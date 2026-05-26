@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/router';
-import DashboardLayout from '@/components/templates/DashboardLayout';
+import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { Card } from '@/components/atoms/Card';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';

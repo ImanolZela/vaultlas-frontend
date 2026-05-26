@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import DashboardLayout from '@/components/templates/DashboardLayout';
+import { DashboardLayout } from '@/components/templates/DashboardLayout';
 import { StatCard } from '@/components/molecules/StatCard';
 import { Card } from '@/components/atoms/Card';
 import { Badge } from '@/components/atoms/Badge';
