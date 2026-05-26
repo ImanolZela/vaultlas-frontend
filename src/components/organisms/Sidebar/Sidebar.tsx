@@ -11,7 +11,7 @@ interface NavLink {
 const links: NavLink[] = [
   { href: '/dashboard', label: 'Dashboard',     icon: '◈' },
   { href: '/upload',    label: 'Subir Estado',  icon: '⊕' },
-  { href: '/movements', label: 'Movimientos',   icon: '⇌' },
+  { href: '/documents',  label: 'Documentos',    icon: '⇌' },
   { href: '/reports',   label: 'Reportes',      icon: '◎' },
   { href: '/settings',  label: 'Configuración', icon: '⚙' },
 ];
