@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { Spinner } from '@/components/atoms/Spinner';
 
-export default function Home() {
+export default function Home(): JSX.Element {
   const router = useRouter();
 
   useEffect(() => {
@@ -11,7 +12,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0F0F0F' }}>
-      <div className="text-vault-neon text-xl">Cargando Vaultlas...</div>
+      <Spinner size="lg" text="Cargando..." />
     </div>
   );
 }

@@ -1,6 +1,8 @@
-import { useAuth } from '../hooks/useAuth';
+import React from 'react';
+import { Button } from '@/components/atoms/Button';
+import { useAuth } from '@/hooks/useAuth';
 
-export default function Header() {
+export const Header: React.FC = () => {
   const { user, logout } = useAuth();
 
   return (
@@ -10,13 +12,11 @@ export default function Header() {
     >
       <span className="text-gradient-neon text-xl font-bold tracking-wide">Vaultlas</span>
       <div className="flex items-center gap-4">
-        {user && (
-          <span className="text-gray-400 text-sm">{user.email}</span>
-        )}
-        <button onClick={logout} className="btn-secondary text-sm px-3 py-1">
+        {user && <span className="text-gray-400 text-sm">{user.email}</span>}
+        <Button variant="secondary" onClick={logout} className="text-sm px-3 py-1">
           Cerrar sesión
-        </button>
+        </Button>
       </div>
     </header>
   );
-}
+};

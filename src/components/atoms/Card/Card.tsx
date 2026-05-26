@@ -1,4 +1,18 @@
-export default function Card({ children, title, className = '', neon = false }) {
+import React from 'react';
+
+interface CardProps {
+  children: React.ReactNode;
+  title?: string;
+  neon?: boolean;
+  className?: string;
+}
+
+export const Card: React.FC<CardProps> = ({
+  children,
+  title,
+  neon = false,
+  className = '',
+}) => {
   return (
     <div className={`${neon ? 'card-neon' : 'card'} ${className}`}>
       {title && (
@@ -9,4 +23,4 @@ export default function Card({ children, title, className = '', neon = false }) 
       {children}
     </div>
   );
-}
+};
