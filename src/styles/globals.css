@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background-color: #0F0F0F;
+  color: #FFFFFF;
+  min-height: 100vh;
+}
+
+a {
+  color: #CCFF00;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #B3FF00;
+}
+
+button {
+  cursor: pointer;
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-vault-neon text-vault-deep font-semibold rounded-lg
+           hover:bg-vault-lime transition-colors duration-200 disabled:opacity-50
+           disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-transparent text-vault-white font-semibold rounded-lg
+           border border-vault-neon hover:bg-vault-dark hover:border-vault-lime
+           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-danger {
+    @apply px-4 py-2 bg-vault-coral text-white font-semibold rounded-lg
+           hover:bg-red-600 transition-colors duration-200;
+  }
+
+  .card {
+    @apply bg-vault-dark rounded-xl p-6 border border-white/10
+           shadow-lg shadow-black/20;
+  }
+
+  .card-neon {
+    @apply card border-vault-neon/30 hover:border-vault-neon/60 transition-colors duration-200;
+  }
+
+  .text-success {
+    @apply text-vault-emerald font-semibold;
+  }
+
+  .text-danger {
+    @apply text-vault-coral font-semibold;
+  }
+
+  .text-alert {
+    @apply text-vault-amber font-semibold;
+  }
+
+  .gradient-dark {
+    background: linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 100%);
+  }
+
+  .gradient-neon {
+    background: linear-gradient(135deg, #CCFF00 0%, #B3FF00 100%);
+  }
+
+  .text-gradient-neon {
+    background: linear-gradient(90deg, #CCFF00, #B3FF00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .input-dark {
+    @apply w-full px-4 py-2 bg-vault-deep border border-white/10 rounded-lg
+           text-vault-white placeholder-gray-500
+           focus:outline-none focus:ring-2 focus:ring-vault-neon focus:border-transparent
+           transition-all duration-200;
+  }
+}
