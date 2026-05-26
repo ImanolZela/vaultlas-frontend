@@ -1,7 +1,12 @@
-import Sidebar from './Sidebar';
-import Header from './Header';
+import React from 'react';
+import { Header } from '@/components/organisms/Header';
+import { Sidebar } from '@/components/organisms/Sidebar';
 
-export default function Layout({ children }) {
+interface DashboardLayoutProps {
+  children: React.ReactNode;
+}
+
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#0F0F0F' }}>
       <Sidebar />
@@ -13,4 +18,4 @@ export default function Layout({ children }) {
       </div>
     </div>
   );
-}
+};

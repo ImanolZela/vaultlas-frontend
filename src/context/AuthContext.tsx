@@ -1,10 +1,11 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { AuthContextType, User } from '@/types';
 
-export const AuthContext = createContext(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,13 +16,13 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = (userData, accessToken) => {
+  const login = (userData: User, accessToken: string): void => {
     setUser(userData);
     setToken(accessToken);
     localStorage.setItem('vaultlas_token', accessToken);
   };
 
-  const logout = () => {
+  const logout = (): void => {
     setUser(null);
     setToken(null);
     localStorage.removeItem('vaultlas_token');
@@ -32,4 +33,4 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};
