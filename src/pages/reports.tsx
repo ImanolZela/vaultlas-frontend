@@ -4,6 +4,7 @@ import { StatCard } from '@/components/molecules/StatCard';
 import { Card } from '@/components/atoms/Card';
 import { Spinner } from '@/components/atoms/Spinner';
 import { apiCall } from '@/lib/api';
+import { apiDownload } from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
 import type { MonthlyReport } from '@/types';
 import {
@@ -24,21 +25,49 @@ interface HistoricResponse {
 }
 
 export default function Reports() {
-  const today = new Date();
-  const [mes, setMes] = useState(today.getMonth() + 1);
-  const [ano, setAno] = useState(today.getFullYear());
-  const [report, setReport] = useState<MonthlyReport | null>(null);
   const [historic, setHistoric] = useState<MonthlyReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exportType, setExportType] = useState<'ingresos' | 'egresos' | 'ambos'>('ambos');
+  const [exportPeriodType, setExportPeriodType] = useState<'mes' | 'ano' | 'historico'>('historico');
+  const [exportMes, setExportMes] = useState<number>(new Date().getMonth() + 1);
+  const [exportAno, setExportAno] = useState<number>(new Date().getFullYear());
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const handleExport = async (format: 'pdf' | 'excel') => {
+    setExporting(true);
+    setExportError(null);
+    try {
+      const params = new URLSearchParams({ report_type: exportType });
+      if (exportPeriodType === 'mes') {
+        params.set('mes', String(exportMes));
+        params.set('ano', String(exportAno));
+      } else if (exportPeriodType === 'ano') {
+        params.set('ano', String(exportAno));
+      }
+      const ext = format === 'pdf' ? 'pdf' : 'xlsx';
+      const endpoint = `/api/exports/${format}?${params.toString()}`;
+      const MONTHS_LOWER = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      let filename: string;
+      if (exportPeriodType === 'mes') {
+        filename = `${MONTHS_LOWER[exportMes - 1]}_${exportAno}_${exportType}_mensual.${ext}`;
+      } else if (exportPeriodType === 'ano') {
+        filename = `${exportAno}_${exportType}_anual.${ext}`;
+      } else {
+        filename = `historico_${exportType}.${ext}`;
+      }
+      await apiDownload(endpoint, filename);
+    } catch (err: unknown) {
+      setExportError(err instanceof Error ? err.message : 'Error al exportar');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const loadReport = async () => {
     setLoading(true);
     try {
-      const [monthly, hist] = await Promise.all([
-        apiCall<MonthlyReport>(`/api/reports/monthly?mes=${mes}&ano=${ano}`),
-        apiCall<HistoricResponse>('/api/reports/historic?months=6'),
-      ]);
-      setReport(monthly);
+      const hist = await apiCall<HistoricResponse>('/api/reports/historic?months=12');
       setHistoric(hist.reportes ?? []);
     } catch (err) {
       console.error('Error cargando reporte:', err);
@@ -47,7 +76,13 @@ export default function Reports() {
     }
   };
 
-  useEffect(() => { loadReport(); }, [mes, ano]);
+  useEffect(() => { loadReport(); }, []);
+
+  const historicFiltered = historic.filter((r) => r.total_ingresos > 0 || r.total_egresos > 0);
+
+  const totalIngresos = historicFiltered.reduce((s, r) => s + r.total_ingresos, 0);
+  const totalEgresos = historicFiltered.reduce((s, r) => s + r.total_egresos, 0);
+  const totalNeto = totalIngresos - totalEgresos;
 
   const MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
@@ -86,53 +121,104 @@ export default function Reports() {
       <div className="space-y-8">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <h1 className="text-3xl font-bold text-white">Reportes</h1>
-          <div className="flex gap-3 items-center">
-            <select
-              value={mes}
-              onChange={(e) => setMes(Number(e.target.value))}
-              className="bg-vault-dark border border-vault-dark text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vault-neon"
-            >
-              {MONTHS.map((m, i) => (
-                <option key={i} value={i + 1}>{m}</option>
-              ))}
-            </select>
-            <select
-              value={ano}
-              onChange={(e) => setAno(Number(e.target.value))}
-              className="bg-vault-dark border border-vault-dark text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-vault-neon"
-            >
-              {[today.getFullYear(), today.getFullYear() - 1, today.getFullYear() - 2].map((y) => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-          </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-16"><Spinner size="lg" /></div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard title="Ingresos" value={formatCurrency(report?.total_ingresos ?? 0)} valueColor="text-vault-emerald" />
-              <StatCard title="Egresos" value={formatCurrency(report?.total_egresos ?? 0)} valueColor="text-vault-coral" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <StatCard title="Ingresos históricos" value={formatCurrency(totalIngresos)} valueColor="text-vault-emerald" />
+              <StatCard title="Egresos históricos" value={formatCurrency(totalEgresos)} valueColor="text-vault-coral" />
               <StatCard
-                title="Neto"
-                value={formatCurrency(report?.neto ?? 0)}
-                valueColor={(report?.neto ?? 0) >= 0 ? 'text-vault-blue' : 'text-vault-coral'}
-              />
-              <StatCard
-                title="Meta cumplida"
-                value={report?.cumplimiento_porcentaje != null ? `${report.cumplimiento_porcentaje.toFixed(1)}%` : '—'}
-                valueColor={
-                  report?.cumplimiento_porcentaje == null ? 'text-gray-500'
-                  : report.cumplimiento_porcentaje >= 100 ? 'text-vault-emerald'
-                  : 'text-vault-amber'
-                }
+                title="Neto histórico"
+                value={formatCurrency(totalNeto)}
+                valueColor={totalNeto >= 0 ? 'text-vault-blue' : 'text-vault-coral'}
               />
             </div>
 
-            <Card title="Evolución histórica (últimos 6 meses)">
-              {historic.length > 0 ? (
+            <Card title="Exportar reporte">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Tipo de reporte</label>
+                    <select
+                      value={exportType}
+                      onChange={(e) => setExportType(e.target.value as 'ingresos' | 'egresos' | 'ambos')}
+                      className="w-full bg-vault-dark border border-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:border-vault-neon"
+                    >
+                      <option value="ingresos">Solo ingresos</option>
+                      <option value="egresos">Solo egresos</option>
+                      <option value="ambos">Ingresos y egresos</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Período</label>
+                    <select
+                      value={exportPeriodType}
+                      onChange={(e) => setExportPeriodType(e.target.value as 'mes' | 'ano' | 'historico')}
+                      className="w-full bg-vault-dark border border-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:border-vault-neon"
+                    >
+                      <option value="historico">Histórico completo</option>
+                      <option value="ano">Por año</option>
+                      <option value="mes">Por mes</option>
+                    </select>
+                  </div>
+                  {exportPeriodType !== 'historico' && (
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">
+                        {exportPeriodType === 'mes' ? 'Mes y año' : 'Año'}
+                      </label>
+                      <div className="flex gap-2">
+                        {exportPeriodType === 'mes' && (
+                          <select
+                            value={exportMes}
+                            onChange={(e) => setExportMes(Number(e.target.value))}
+                            className="flex-1 bg-vault-dark border border-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:border-vault-neon"
+                          >
+                            {['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'].map((m, i) => (
+                              <option key={i + 1} value={i + 1}>{m}</option>
+                            ))}
+                          </select>
+                        )}
+                        <input
+                          type="number"
+                          value={exportAno}
+                          onChange={(e) => setExportAno(Number(e.target.value))}
+                          min={2000}
+                          max={2100}
+                          className="w-24 bg-vault-dark border border-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:border-vault-neon"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {exportError && (
+                  <p className="text-vault-coral text-sm">{exportError}</p>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleExport('pdf')}
+                    disabled={exporting}
+                    className="flex items-center gap-2 px-4 py-2 bg-vault-neon text-vault-dark text-sm font-semibold rounded hover:bg-vault-neon/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {exporting ? '...' : '↓ PDF'}
+                  </button>
+                  <button
+                    onClick={() => handleExport('excel')}
+                    disabled={exporting}
+                    className="flex items-center gap-2 px-4 py-2 bg-vault-dark border border-vault-neon text-vault-neon text-sm font-semibold rounded hover:bg-vault-neon/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {exporting ? '...' : '↓ Excel'}
+                  </button>
+                </div>
+              </div>
+            </Card>
+
+            <Card title="Evolución histórica (últimos 12 meses)">
+              {historicFiltered.length > 0 ? (
                 <Bar data={chartData} options={chartOptions} />
               ) : (
                 <p className="text-gray-500 text-sm text-center py-8">No hay datos históricos disponibles.</p>

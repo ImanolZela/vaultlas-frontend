@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { AuthContextType, User } from '@/types';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -10,10 +12,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const savedToken = localStorage.getItem('vaultlas_token');
-    if (savedToken) {
-      setToken(savedToken);
+    if (!savedToken) {
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+    fetch(`${API_URL}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${savedToken}` },
+    })
+      .then((res) => {
+        if (res.ok) {
+          setToken(savedToken);
+        } else {
+          localStorage.removeItem('vaultlas_token');
+          setToken(null);
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem('vaultlas_token');
+        setToken(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const login = (userData: User, accessToken: string): void => {

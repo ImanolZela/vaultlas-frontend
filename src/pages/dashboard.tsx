@@ -20,25 +20,34 @@ export default function Dashboard() {
   const [report, setReport] = useState<MonthlyReport | null>(null);
   const [documents, setDocuments] = useState<VaultDocument[]>([]);
   const [goal, setGoal] = useState<Goal | null>(null);
+  const [reportPeriodo, setReportPeriodo] = useState<{ mes: number; ano: number } | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [reportData, docsData] = await Promise.all([
-          apiCall<MonthlyReport>('/api/reports/monthly'),
-          apiCall<DocumentsResponse>('/api/documents?limit=5'),
-        ]);
-        setReport(reportData);
-        setDocuments(docsData.documents ?? []);
+        const docsData = await apiCall<DocumentsResponse>('/api/documents?limit=5');
+        const docs = docsData.documents ?? [];
+        setDocuments(docs);
 
         const today = new Date();
-        try {
-          const goalData = await apiCall<Goal>(`/api/goals/${today.getMonth() + 1}/${today.getFullYear()}`);
-          setGoal(goalData);
-        } catch {
-          setGoal(null);
+        const latestDone = docs.find((d) => d.status === 'done' && d.periodo);
+        let mes = today.getMonth() + 1;
+        let ano = today.getFullYear();
+        if (latestDone?.periodo) {
+          const [y, m] = latestDone.periodo.split('-').map(Number);
+          if (y && m) { ano = y; mes = m; }
         }
+
+        const [reportData, goalData] = await Promise.all([
+          apiCall<MonthlyReport>(`/api/reports/monthly?mes=${mes}&ano=${ano}`),
+          apiCall<Goal>(`/api/goals/${mes}/${ano}`).catch(() => null),
+        ]);
+        setReport(reportData);
+        setGoal(goalData);
+        setReportPeriodo({ mes, ano });
       } catch (err) {
         console.error('Error cargando datos:', err);
       } finally {
@@ -93,7 +102,7 @@ export default function Dashboard() {
 
         {/* Meta de ingresos */}
         {goal && (
-          <Card title="Cumplimiento de meta mensual" neon>
+          <Card title={`Cumplimiento de meta — ${reportPeriodo ? `${MONTHS[reportPeriodo.mes - 1]} ${reportPeriodo.ano}` : ''}`} neon>
             <div className="space-y-3">
               <div className="flex justify-between text-sm text-gray-400">
                 <span>{formatCurrency(report?.total_ingresos ?? 0)} logrado</span>
