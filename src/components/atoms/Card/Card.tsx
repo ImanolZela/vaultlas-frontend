@@ -16,9 +16,10 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div className={`${neon ? 'card-neon' : 'card'} ${className}`}>
       {title && (
-        <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+        <p className="font-mono text-[10px] font-500 tracking-[0.2em] uppercase mb-4"
+           style={{ color: 'rgba(204,255,0,0.55)', letterSpacing: '0.18em' }}>
           {title}
-        </h3>
+        </p>
       )}
       {children}
     </div>
