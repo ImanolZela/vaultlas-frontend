@@ -3,11 +3,16 @@ import { useRouter } from 'next/router';
 import { NavItem } from '@/components/molecules/NavItem';
 
 const links = [
-  { href: '/dashboard', label: 'Dashboard',    icon: '◈' },
-  { href: '/upload',    label: 'Subir Estado', icon: '⊕' },
-  { href: '/documents', label: 'Documentos',   icon: '⇌' },
-  { href: '/reports',   label: 'Reportes',     icon: '◎' },
-  { href: '/settings',  label: 'Configuración',icon: '⚙' },
+  { href: '/dashboard',       label: 'Dashboard',      icon: '◈' },
+  { href: '/income',          label: 'Ingresos',        icon: '↑' },
+  { href: '/expense',         label: 'Gastos',          icon: '↓' },
+  { href: '/budget',          label: 'Presupuesto',     icon: '◉' },
+  { href: '/reconciliation',  label: 'Reconciliación',  icon: '⇄' },
+  { href: '/annual-summary',  label: 'Resumen Anual',   icon: '◐' },
+  { href: '/upload',          label: 'Subir Estado',    icon: '⊕' },
+  { href: '/documents',       label: 'Documentos',      icon: '⇌' },
+  { href: '/reports',         label: 'Reportes',        icon: '◎' },
+  { href: '/settings',        label: 'Configuración',   icon: '⚙' },
 ];
 
 interface SidebarProps {
