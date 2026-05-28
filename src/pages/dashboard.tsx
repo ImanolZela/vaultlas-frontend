@@ -101,8 +101,8 @@ export default function Dashboard() {
         </div>
 
         {/* Meta de ingresos */}
-        {goal && (
-          <Card title={`Cumplimiento de meta — ${reportPeriodo ? `${MONTHS[reportPeriodo.mes - 1]} ${reportPeriodo.ano}` : ''}`} neon>
+        <Card title={`Cumplimiento de meta — ${reportPeriodo ? `${MONTHS[reportPeriodo.mes - 1]} ${reportPeriodo.ano}` : ''}`} neon>
+          {goal && goal.meta_ingresos > 0 ? (
             <div className="space-y-3">
               <div className="flex justify-between text-sm text-gray-400">
                 <span>{formatCurrency(report?.total_ingresos ?? 0)} logrado</span>
@@ -117,9 +117,20 @@ export default function Dashboard() {
               <p className="text-sm text-gray-400">
                 <span className="text-vault-neon font-bold">{goalPct.toFixed(1)}%</span> de la meta cumplida
               </p>
+              <Button variant="ghost" onClick={() => router.push('/settings')} className="text-xs mt-2">
+                Editar meta
+              </Button>
             </div>
-          </Card>
-        )}
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-gray-400">No has configurado una meta de ingresos para este mes.</p>
+              <p className="text-sm text-gray-500">Establece una meta mensual para visualizar tu progreso.</p>
+              <Button variant="primary" onClick={() => router.push('/settings')} className="text-sm mt-2">
+                + Configurar meta
+              </Button>
+            </div>
+          )}
+        </Card>
 
         {/* Documentos recientes */}
         <Card title="Documentos recientes">
