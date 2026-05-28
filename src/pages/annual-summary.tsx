@@ -63,7 +63,7 @@ export default function AnnualSummaryPage() {
                 {MONTH_NAMES.map((name, i) => {
                   const monthData = summary.months.find((m) => {
                     const d = new Date(m.month);
-                    return d.getMonth() === i;
+                    return d.getUTCMonth() === i;
                   });
                   const income = monthData?.total_income ?? 0;
                   const net = monthData?.net ?? 0;
@@ -115,7 +115,7 @@ export default function AnnualSummaryPage() {
                   <tbody className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
                     {summary.months.map((m) => {
                       const d = new Date(m.month);
-                      const monthName = MONTH_NAMES[d.getMonth()];
+                      const monthName = MONTH_NAMES[d.getUTCMonth()];
                       return (
                         <tr key={m.month} className="transition-colors hover:bg-white/[0.02]">
                           <td className="py-2.5 pr-4">
