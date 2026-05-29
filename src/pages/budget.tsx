@@ -242,6 +242,46 @@ export default function BudgetPage() {
               </div>
             </Card>
 
+            {/* ── Mini-tablas por bucket ─────────────────────── */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {BUCKETS.map((b) => {
+                const budgeted = val(b.budgeted);
+                const actual   = val(b.actual);
+                const avail    = Math.max(budgeted - actual, 0);
+                const pct      = budgeted > 0 ? Math.min((actual / budgeted) * 100, 100) : 0;
+                const sc       = statusColor(pct);
+                const rows = [
+                  { label: 'Presupuestado', value: formatCurrency(budgeted), color: 'rgba(255,255,255,0.75)' },
+                  { label: 'Gastado',       value: formatCurrency(actual),   color: sc },
+                  { label: 'Disponible',    value: formatCurrency(avail),    color: avail > 0 ? b.color : 'rgba(255,100,100,0.8)' },
+                  { label: '% Usado',       value: `${pct.toFixed(0)}%`,     color: sc },
+                ];
+                return (
+                  <div key={b.key} className="rounded-xl p-3"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${b.color.replace('0.85','0.15')}` }}>
+                    <div className="flex items-center gap-1.5 mb-2.5 pb-2"
+                      style={{ borderBottom: `1px solid ${b.color.replace('0.85','0.12')}` }}>
+                      <span style={{ color: b.color, fontSize: '13px' }}>{b.icon}</span>
+                      <span className="font-mono text-[9px] tracking-widest uppercase font-semibold"
+                        style={{ color: b.color }}>{b.label}</span>
+                    </div>
+                    <table className="w-full">
+                      <tbody>
+                        {rows.map((r) => (
+                          <tr key={r.label}>
+                            <td className="py-0.5 font-mono text-[9px] uppercase tracking-wider"
+                              style={{ color: 'rgba(255,255,255,0.35)' }}>{r.label}</td>
+                            <td className="py-0.5 text-right font-mono text-[11px] font-semibold"
+                              style={{ color: r.color }}>{r.value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })}
+            </div>
+
             {/* ── Estado ─────────────────────────────────────── */}
             {budget && (
               <div className="flex items-center justify-between px-1">
