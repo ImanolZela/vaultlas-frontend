@@ -292,53 +292,52 @@ export default function Dashboard() {
         </div>
 
         {/* ── Row 2: Bar chart | Donut + Savings ring ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
           {/* Bar chart */}
-          <div className="lg:col-span-3">
-            <Card title="Ingresos vs Gastos — últimos 6 meses">
+          <div className="lg:col-span-2">
+            <Card className="h-full" title="Ingresos vs Gastos — últimos 6 meses">
               <BarChart budgets={budgets} />
             </Card>
           </div>
 
-          {/* Donut + savings ring */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
-            <Card title="Distribución de gastos">
+          {/* Donut + savings ring (single tall card) */}
+          <div className="lg:col-span-1">
+            <Card className="h-full" title="Distribución de gastos">
               <DonutChart budget={budget} />
-            </Card>
-            <div className="rounded-xl p-4 flex items-center gap-4"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <SavingsRing income={income} savings={ahorros} />
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-semibold text-white">{formatCurrency(ahorros)}</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  {income > 0
-                    ? `Estás ahorrando el ${((ahorros / income) * 100).toFixed(1)}% de tus ingresos`
-                    : 'Sin ingresos registrados este mes'}
-                </p>
-                {income > 0 && (
-                  <p className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                    Meta recomendada: 20%
+              <div className="mt-4 pt-4 flex items-center gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                <SavingsRing income={income} savings={ahorros} />
+                <div className="flex-1 space-y-1">
+                  <p className="text-sm font-semibold text-white">{formatCurrency(ahorros)}</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                    {income > 0
+                      ? `Estás ahorrando el ${((ahorros / income) * 100).toFixed(1)}% de tus ingresos`
+                      : 'Sin ingresos registrados este mes'}
                   </p>
-                )}
+                  {income > 0 && (
+                    <p className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                      Meta recomendada: 20%
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
 
         {/* ── Row 3: Net flow + Budget progress ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
           {/* Net flow bar */}
-          <div className="lg:col-span-2">
-            <Card title={`Flujo del mes — ${MONTHS_FULL[mes - 1]}`}>
+          <div className="lg:col-span-1">
+            <Card className="h-full" title={`Flujo del mes — ${MONTHS_FULL[mes - 1]}`}>
               <NetFlowBar income={income} expenses={totalExpenses} />
             </Card>
           </div>
 
           {/* Budget 50-30-20 progress */}
-          <div className="lg:col-span-3">
-            <Card title="Presupuesto 50-30-20">
+          <div className="lg:col-span-2">
+            <Card className="h-full" title="Presupuesto 50-30-20">
               {hasBudget ? (
                 <div className="space-y-3">
                   {BUCKET_CONFIG.map((b) => {
