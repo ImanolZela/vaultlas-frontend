@@ -13,9 +13,10 @@ export const NavItem: React.FC<NavItemProps> = ({ href, label, icon, isActive, o
   return (
     <Link href={href} onClick={onClick}>
       <div
-        className={`relative flex items-center gap-3 mx-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${
-          isActive ? 'bg-vault-card' : 'hover:bg-white/[0.03]'
+        className={`relative flex items-center gap-3 mx-3 px-4 py-2 rounded-lg text-sm transition-all duration-200 cursor-pointer ${
+          isActive ? 'bg-vault-card' : 'hover:bg-white/[0.05]'
         }`}
+        style={isActive ? { boxShadow: 'inset 0 0 0 1px rgba(204,255,0,0.06)' } : {}}
       >
         {isActive && (
           <span

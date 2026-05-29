@@ -2,18 +2,38 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { NavItem } from '@/components/molecules/NavItem';
 
-const links = [
-  { href: '/dashboard',       label: 'Dashboard',      icon: '◈' },
-  { href: '/income',          label: 'Ingresos',        icon: '↑' },
-  { href: '/expense',         label: 'Gastos',          icon: '↓' },
-  { href: '/budget',          label: 'Presupuesto',     icon: '◉' },
-  { href: '/reconciliation',  label: 'Reconciliación',  icon: '⇄' },
-  { href: '/annual-summary',  label: 'Resumen Anual',   icon: '◐' },
-  { href: '/upload',          label: 'Subir Estado',    icon: '⊕' },
-  { href: '/documents',       label: 'Documentos',      icon: '⇌' },
-  { href: '/reports',         label: 'Reportes',        icon: '◎' },
-  { href: '/finance-reports', label: 'Reportes 50-30-20', icon: '▦' },
-  { href: '/settings',        label: 'Configuración',   icon: '⚙' },
+const NAV_SECTIONS = [
+  {
+    label: 'Principal',
+    items: [
+      { href: '/dashboard', label: 'Dashboard', icon: '◈' },
+    ],
+  },
+  {
+    label: 'Finanzas',
+    items: [
+      { href: '/income',  label: 'Ingresos',    icon: '↑' },
+      { href: '/expense', label: 'Gastos',       icon: '↓' },
+      { href: '/budget',  label: 'Presupuesto',  icon: '◉' },
+    ],
+  },
+  {
+    label: 'Análisis',
+    items: [
+      { href: '/reconciliation', label: 'Reconciliación',    icon: '⇄' },
+      { href: '/annual-summary', label: 'Resumen Anual',     icon: '◐' },
+      { href: '/finance-reports',label: 'Reportes 50-30-20', icon: '▦' },
+    ],
+  },
+  {
+    label: 'Sistema',
+    items: [
+      { href: '/upload',    label: 'Subir Estado', icon: '⊕' },
+      { href: '/documents', label: 'Documentos',   icon: '⇌' },
+      { href: '/reports',   label: 'Reportes',     icon: '◎' },
+      { href: '/settings',  label: 'Configuración',icon: '⚙' },
+    ],
+  },
 ];
 
 interface SidebarProps {
@@ -81,16 +101,38 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-4 space-y-0.5 overflow-y-auto">
-        {links.map((link) => (
-          <NavItem
-            key={link.href}
-            href={link.href}
-            label={link.label}
-            icon={link.icon}
-            isActive={router.pathname.startsWith(link.href)}
-            onClick={onClose}
-          />
+      <nav className="flex-1 py-3 overflow-y-auto space-y-1">
+        {NAV_SECTIONS.map((section, sIdx) => (
+          <div key={section.label}>
+            {/* Section label */}
+            <div className={`px-5 ${sIdx > 0 ? 'pt-4' : 'pt-1'} pb-1.5`}>
+              <p
+                className="font-mono text-[8px] tracking-[0.25em] uppercase select-none"
+                style={{ color: 'rgba(204,255,0,0.25)' }}
+              >
+                {section.label}
+              </p>
+            </div>
+            {/* Divider above section (except first) */}
+            {sIdx > 0 && (
+              <div
+                className="mx-5 mb-2"
+                style={{ height: '1px', background: 'rgba(255,255,255,0.04)' }}
+              />
+            )}
+            <div className="space-y-0.5">
+              {section.items.map((link) => (
+                <NavItem
+                  key={link.href}
+                  href={link.href}
+                  label={link.label}
+                  icon={link.icon}
+                  isActive={router.pathname === link.href || router.pathname.startsWith(link.href + '/')}
+                  onClick={onClose}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 
