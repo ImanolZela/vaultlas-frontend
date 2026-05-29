@@ -12,6 +12,7 @@ const links = [
   { href: '/upload',          label: 'Subir Estado',    icon: '⊕' },
   { href: '/documents',       label: 'Documentos',      icon: '⇌' },
   { href: '/reports',         label: 'Reportes',        icon: '◎' },
+  { href: '/finance-reports', label: 'Reportes 50-30-20', icon: '▦' },
   { href: '/settings',        label: 'Configuración',   icon: '⚙' },
 ];
 
