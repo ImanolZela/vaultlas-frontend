@@ -158,7 +158,8 @@ export default function FinanceReports() {
             <select
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}
-              className="bg-vault-dark border border-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:border-vault-neon"
+              className="rounded-md px-3 py-1.5 text-white text-sm outline-none"
+              style={{ background: 'rgba(20,20,20,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}
             >
               {yearOptions.map((y) => (
                 <option key={y} value={y}>{y}</option>

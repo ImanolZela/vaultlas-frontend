@@ -68,7 +68,7 @@ export default function ReconciliationPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-1"
                style={{ color: 'rgba(204,255,0,0.55)' }}>Análisis</p>

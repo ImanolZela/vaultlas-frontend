@@ -89,7 +89,7 @@ export default function BudgetPage() {
                 <span style={{ color: 'rgba(255,255,255,0.5)' }}>Ingresos del mes</span>
                 <span className="text-white font-semibold">{formatCurrency(val('total_income'))}</span>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
                   { key: 'needs',       label: 'Necesidades %', color: 'rgba(100,180,255,0.8)' },
                   { key: 'wants',       label: 'Gustos %',      color: 'rgba(255,160,100,0.8)' },

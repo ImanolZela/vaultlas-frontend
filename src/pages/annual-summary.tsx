@@ -21,7 +21,7 @@ export default function AnnualSummaryPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-1"
                style={{ color: 'rgba(204,255,0,0.55)' }}>Estadísticas</p>
@@ -59,7 +59,7 @@ export default function AnnualSummaryPage() {
 
             {/* Monthly bar chart */}
             <Card title={`Ingresos por mes — ${year}`}>
-              <div className="flex items-end gap-2 h-36 pt-4">
+              <div className="flex items-end gap-1 sm:gap-2 h-36 pt-4">
                 {MONTH_NAMES.map((name, i) => {
                   const monthData = summary.months.find((m) => {
                     const d = new Date(m.month);

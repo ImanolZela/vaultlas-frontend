@@ -48,9 +48,9 @@ function BarChart({ budgets }: { budgets: MonthlyBudget[] }) {
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-2">
+      <div className="flex gap-1 sm:gap-2">
         {/* Y-axis labels */}
-        <div className="flex flex-col justify-between items-end shrink-0 pb-6" style={{ height: CHART_H }}>
+        <div className="hidden sm:flex flex-col justify-between items-end shrink-0 pb-6" style={{ height: CHART_H }}>
           {[...ticks].reverse().map((t) => (
             <span key={t} className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
               {t >= 1000 ? `${(t / 1000).toFixed(0)}k` : t.toFixed(0)}
