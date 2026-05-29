@@ -4,6 +4,7 @@ import { Card } from '@/components/atoms/Card';
 import { Button } from '@/components/atoms/Button';
 import { Spinner } from '@/components/atoms/Spinner';
 import { useBudget } from '@/hooks/useBudget';
+import { useExpense } from '@/hooks/useExpense';
 import { formatCurrency } from '@/lib/utils';
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -25,6 +26,7 @@ export default function BudgetPage() {
   const [showConfig, setShowConfig] = useState(false);
   const [saving, setSaving] = useState(false);
   const { budget, loading, error, save } = useBudget(mes, ano);
+  const { expenses } = useExpense(mes, ano);
 
   const [percents, setPercents] = useState({ needs: 50, wants: 30, savings: 20, debt_amount: 0 });
 
@@ -242,41 +244,39 @@ export default function BudgetPage() {
               </div>
             </Card>
 
-            {/* ── Mini-tablas por bucket ─────────────────────── */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* ── Entradas por bucket ────────────────────────── */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-start">
               {BUCKETS.map((b) => {
-                const budgeted = val(b.budgeted);
-                const actual   = val(b.actual);
-                const avail    = Math.max(budgeted - actual, 0);
-                const pct      = budgeted > 0 ? Math.min((actual / budgeted) * 100, 100) : 0;
-                const sc       = statusColor(pct);
-                const rows = [
-                  { label: 'Presupuestado', value: formatCurrency(budgeted), color: 'rgba(255,255,255,0.75)' },
-                  { label: 'Gastado',       value: formatCurrency(actual),   color: sc },
-                  { label: 'Disponible',    value: formatCurrency(avail),    color: avail > 0 ? b.color : 'rgba(255,100,100,0.8)' },
-                  { label: '% Usado',       value: `${pct.toFixed(0)}%`,     color: sc },
-                ];
+                const items = expenses.filter((e) => e.bucket === b.key);
                 return (
-                  <div key={b.key} className="rounded-xl p-3"
+                  <div key={b.key} className="rounded-xl overflow-hidden"
                     style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${b.color.replace('0.85','0.15')}` }}>
-                    <div className="flex items-center gap-1.5 mb-2.5 pb-2"
-                      style={{ borderBottom: `1px solid ${b.color.replace('0.85','0.12')}` }}>
-                      <span style={{ color: b.color, fontSize: '13px' }}>{b.icon}</span>
+                    {/* header */}
+                    <div className="flex items-center gap-1.5 px-3 py-2"
+                      style={{ borderBottom: `1px solid ${b.color.replace('0.85','0.10')}`, background: b.color.replace('0.85','0.06') }}>
+                      <span style={{ color: b.color, fontSize: '12px' }}>{b.icon}</span>
                       <span className="font-mono text-[9px] tracking-widest uppercase font-semibold"
                         style={{ color: b.color }}>{b.label}</span>
                     </div>
-                    <table className="w-full">
-                      <tbody>
-                        {rows.map((r) => (
-                          <tr key={r.label}>
-                            <td className="py-0.5 font-mono text-[9px] uppercase tracking-wider"
-                              style={{ color: 'rgba(255,255,255,0.35)' }}>{r.label}</td>
-                            <td className="py-0.5 text-right font-mono text-[11px] font-semibold"
-                              style={{ color: r.color }}>{r.value}</td>
-                          </tr>
+                    {/* rows */}
+                    {items.length === 0 ? (
+                      <p className="px-3 py-4 font-mono text-[9px] text-center"
+                        style={{ color: 'rgba(255,255,255,0.2)' }}>Sin entradas</p>
+                    ) : (
+                      <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+                        {items.map((e) => (
+                          <div key={e.id} className="flex items-center justify-between px-3 py-1.5 gap-2">
+                            <span className="text-[11px] truncate" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                              {e.description || e.category_name}
+                            </span>
+                            <span className="font-mono text-[11px] font-semibold shrink-0"
+                              style={{ color: b.color }}>
+                              {formatCurrency(e.amount)}
+                            </span>
+                          </div>
                         ))}
-                      </tbody>
-                    </table>
+                      </div>
+                    )}
                   </div>
                 );
               })}
