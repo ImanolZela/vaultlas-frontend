@@ -264,17 +264,25 @@ export default function BudgetPage() {
                         style={{ color: 'rgba(255,255,255,0.2)' }}>Sin entradas</p>
                     ) : (
                       <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
-                        {items.map((e) => (
-                          <div key={e.id} className="flex items-center justify-between px-3 py-1.5 gap-2">
-                            <span className="text-[11px] truncate" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                              {e.description || e.category_name}
-                            </span>
-                            <span className="font-mono text-[11px] font-semibold shrink-0"
-                              style={{ color: b.color }}>
-                              {formatCurrency(e.amount)}
-                            </span>
-                          </div>
-                        ))}
+                        {items.map((e) => {
+                          const d = new Date(e.date + 'T00:00:00');
+                          const dayLabel = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+                          return (
+                            <div key={e.id} className="flex items-center justify-between px-3 py-1.5 gap-2">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="font-mono text-[9px] shrink-0"
+                                  style={{ color: 'rgba(255,255,255,0.3)' }}>{dayLabel}</span>
+                                <span className="text-[11px] truncate" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                                  {e.description || e.category_name}
+                                </span>
+                              </div>
+                              <span className="font-mono text-[11px] font-semibold shrink-0"
+                                style={{ color: b.color }}>
+                                {formatCurrency(e.amount)}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
