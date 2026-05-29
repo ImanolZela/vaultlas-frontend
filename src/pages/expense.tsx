@@ -64,7 +64,7 @@ function FixedExpenseForm({ onSubmit, onCancel }: { onSubmit: (d: ExpenseFixedMo
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={labelCls} style={labelStyle}>Nombre del gasto</label>
           <input type="text" value={form.name} onChange={(e) => set('name', e.target.value)}
@@ -80,7 +80,7 @@ function FixedExpenseForm({ onSubmit, onCancel }: { onSubmit: (d: ExpenseFixedMo
 
       <div>
         <label className={labelCls} style={labelStyle}>Bucket</label>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {(Object.entries(BUCKET_CONFIG) as [BudgetBucket, any][]).map(([b, cfg]) => (
             <button key={b} type="button" onClick={() => handleBucketChange(b)}
               className="rounded-md py-2 px-1 text-xs font-medium transition-all"
@@ -95,7 +95,7 @@ function FixedExpenseForm({ onSubmit, onCancel }: { onSubmit: (d: ExpenseFixedMo
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label className={labelCls} style={labelStyle}>Categoría</label>
           <select value={form.category_name} onChange={(e) => set('category_name', e.target.value)}

@@ -44,7 +44,7 @@ export default function IncomePage() {
         </div>
 
         {/* Selector mes */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <select value={mes} onChange={(e) => setMes(Number(e.target.value))}
             className="rounded-md px-3 py-1.5 text-white text-sm outline-none"
             style={{ background: 'rgba(20,20,20,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>

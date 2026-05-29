@@ -59,7 +59,7 @@ export const IncomeForm: React.FC<IncomeFormProps> = ({ onSubmit, onCancel }) =>
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={labelCls} style={labelStyle}>Fecha</label>
           <input type="date" value={form.date} onChange={(e) => set('date', e.target.value)}
@@ -87,7 +87,7 @@ export const IncomeForm: React.FC<IncomeFormProps> = ({ onSubmit, onCancel }) =>
           placeholder="0.00" className={inputCls} style={inputStyle} required />
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <input type="checkbox" id="recurring" checked={form.is_recurring}
           onChange={(e) => set('is_recurring', e.target.checked)}
           className="accent-yellow-400" />

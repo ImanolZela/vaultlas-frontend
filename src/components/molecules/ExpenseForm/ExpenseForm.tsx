@@ -65,7 +65,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel }) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={labelCls} style={labelStyle}>Fecha</label>
           <input type="date" value={form.date} onChange={(e) => set('date', e.target.value)}
@@ -81,7 +81,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel }) 
 
       <div>
         <label className={labelCls} style={labelStyle}>Bucket</label>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {BUCKETS.map((b) => (
             <button key={b.value} type="button"
               onClick={() => handleBucketChange(b.value)}
@@ -97,7 +97,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onSubmit, onCancel }) 
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={labelCls} style={labelStyle}>Categoría</label>
           <select value={form.category_name} onChange={(e) => set('category_name', e.target.value)}
