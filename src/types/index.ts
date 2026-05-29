@@ -129,6 +129,16 @@ export interface ExpenseFixedMonthly {
   updated_at: string;
 }
 
+export interface ExpenseFixedMonthlyCreate {
+  name: string;
+  category_name: string;
+  bucket: BudgetBucket;
+  amount: number;
+  day_of_month: number;
+  start_date: string;
+  end_date?: string;
+}
+
 export interface MonthlyBudget {
   id: number;
   user_id: number;

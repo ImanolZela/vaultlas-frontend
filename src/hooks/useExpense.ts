@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiCall } from '@/lib/api';
-import type { Expense, ExpenseCreate, ExpenseFixedMonthly } from '@/types';
+import type { Expense, ExpenseCreate, ExpenseFixedMonthly, ExpenseFixedMonthlyCreate } from '@/types';
 
 export function useExpense(mes?: number, ano?: number) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -40,7 +40,21 @@ export function useExpense(mes?: number, ano?: number) {
     setExpenses((prev) => prev.filter((e) => e.id !== id));
   };
 
+  const createFixed = async (data: ExpenseFixedMonthlyCreate) => {
+    const result = await apiCall<ExpenseFixedMonthly>('/api/expense/fixed/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    setFixedExpenses((prev) => [result, ...prev]);
+    return result;
+  };
+
+  const removeFixed = async (id: number) => {
+    await apiCall(`/api/expense/fixed/${id}`, { method: 'DELETE' });
+    setFixedExpenses((prev) => prev.filter((f) => f.id !== id));
+  };
+
   useEffect(() => { fetch(); }, [fetch]);
 
-  return { expenses, fixedExpenses, loading, error, create, remove, refetch: fetch };
+  return { expenses, fixedExpenses, loading, error, create, remove, createFixed, removeFixed, refetch: fetch };
 }

@@ -16,34 +16,25 @@ const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct
 const MONTHS_FULL  = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 const BUCKET_CONFIG = [
-  { key: 'needs',   label: 'Necesidades', icon: '◧', color: 'rgba(100,180,255,0.85)', budgeted: 'budgeted_needs',   actual: 'actual_needs'   },
-  { key: 'wants',   label: 'Gustos',      icon: '◨', color: 'rgba(255,160,100,0.85)', budgeted: 'budgeted_wants',   actual: 'actual_wants'   },
-  { key: 'savings', label: 'Ahorros',     icon: '◩', color: 'rgba(100,230,180,0.85)', budgeted: 'budgeted_savings', actual: 'actual_savings' },
-  { key: 'debt',    label: 'Deuda',       icon: '◪', color: 'rgba(255,100,100,0.85)', budgeted: 'debt_amount',      actual: 'actual_debt'    },
+  { key: 'needs',   label: 'Necesidades', icon: '◧', color: 'rgba(100,180,255,0.85)',  budgeted: 'budgeted_needs',   actual: 'actual_needs'   },
+  { key: 'wants',   label: 'Gustos',      icon: '◨', color: 'rgba(255,160,100,0.85)',  budgeted: 'budgeted_wants',   actual: 'actual_wants'   },
+  { key: 'savings', label: 'Ahorros',     icon: '◩', color: 'rgba(100,230,180,0.85)',  budgeted: 'budgeted_savings', actual: 'actual_savings' },
+  { key: 'debt',    label: 'Deuda',       icon: '◪', color: 'rgba(255,100,100,0.85)',  budgeted: 'debt_amount',      actual: 'actual_debt'    },
 ] as const;
 
 const statusColor = (pct: number) =>
   pct > 90 ? 'rgba(255,100,100,0.9)' : pct > 70 ? 'rgba(255,200,80,0.85)' : 'rgba(100,230,180,0.85)';
 
+/* ── Bar chart: income vs expenses last 6 months ── */
 function BarChart({ budgets }: { budgets: MonthlyBudget[] }) {
-  // last 6 months with any data, ordered oldest→newest
-  const sorted = [...budgets]
-    .sort((a, b) => a.month.localeCompare(b.month))
-    .slice(-6);
+  const sorted = [...budgets].sort((a, b) => a.month.localeCompare(b.month)).slice(-6);
+  if (sorted.length === 0)
+    return <p className="text-sm text-center py-6" style={{ color: 'rgba(255,255,255,0.2)' }}>Sin historial</p>;
 
-  if (sorted.length === 0) return (
-    <p className="text-sm text-center py-6" style={{ color: 'rgba(255,255,255,0.25)' }}>
-      Sin historial disponible
-    </p>
-  );
-
-  const maxVal = Math.max(
-    ...sorted.map((b) => Math.max(
-      b.total_income,
-      (b.actual_needs ?? 0) + (b.actual_wants ?? 0) + (b.actual_savings ?? 0) + (b.actual_debt ?? 0),
-    )),
-    1,
-  );
+  const maxVal = Math.max(...sorted.map((b) => Math.max(
+    b.total_income,
+    (b.actual_needs ?? 0) + (b.actual_wants ?? 0) + (b.actual_savings ?? 0) + (b.actual_debt ?? 0),
+  )), 1);
 
   return (
     <div className="space-y-3">
@@ -54,60 +45,172 @@ function BarChart({ budgets }: { budgets: MonthlyBudget[] }) {
           const iH = income   > 0 ? Math.max((income   / maxVal) * 100, 4) : 0;
           const eH = expenses > 0 ? Math.max((expenses / maxVal) * 100, 4) : 0;
           const d  = new Date(b.month + 'T00:00:00');
-          const label = MONTHS_SHORT[d.getMonth()];
           return (
             <div key={b.month} className="flex-1 flex flex-col items-center gap-1 group">
               <div className="relative w-full flex items-end justify-center gap-[2px]" style={{ height: '100px' }}>
-                {/* income bar */}
-                <div className="group/bar relative w-[45%]">
+                <div className="group/i relative w-[45%]">
                   {income > 0 && (
-                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover/bar:block z-10 whitespace-nowrap">
-                      <div className="rounded px-1.5 py-0.5 text-[9px] font-mono"
-                        style={{ background: 'rgba(0,0,0,0.9)', color: 'rgba(100,230,180,0.9)' }}>
+                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover/i:block z-10 whitespace-nowrap">
+                      <div className="rounded px-1.5 py-0.5 text-[9px] font-mono" style={{ background: 'rgba(0,0,0,0.9)', color: 'rgba(100,230,180,0.9)' }}>
                         {formatCurrency(income)}
                       </div>
                     </div>
                   )}
                   <div className="w-full rounded-t transition-all duration-700 absolute bottom-0"
-                    style={{
-                      height: `${iH}%`,
-                      background: 'linear-gradient(to top, rgba(100,230,180,0.4), rgba(100,230,180,0.75))',
-                    }} />
+                    style={{ height: `${iH}%`, background: 'linear-gradient(to top, rgba(100,230,180,0.35), rgba(100,230,180,0.7))' }} />
                 </div>
-                {/* expenses bar */}
-                <div className="group/bar relative w-[45%]">
+                <div className="group/e relative w-[45%]">
                   {expenses > 0 && (
-                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover/bar:block z-10 whitespace-nowrap">
-                      <div className="rounded px-1.5 py-0.5 text-[9px] font-mono"
-                        style={{ background: 'rgba(0,0,0,0.9)', color: 'rgba(255,160,100,0.9)' }}>
+                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover/e:block z-10 whitespace-nowrap">
+                      <div className="rounded px-1.5 py-0.5 text-[9px] font-mono" style={{ background: 'rgba(0,0,0,0.9)', color: 'rgba(255,160,100,0.9)' }}>
                         {formatCurrency(expenses)}
                       </div>
                     </div>
                   )}
                   <div className="w-full rounded-t transition-all duration-700 absolute bottom-0"
-                    style={{
-                      height: `${eH}%`,
-                      background: 'linear-gradient(to top, rgba(255,160,100,0.35), rgba(255,160,100,0.65))',
-                    }} />
+                    style={{ height: `${eH}%`, background: 'linear-gradient(to top, rgba(255,160,100,0.3), rgba(255,160,100,0.6))' }} />
                 </div>
               </div>
               <span className="font-mono text-[9px] uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                {label}
+                {MONTHS_SHORT[d.getMonth()]}
               </span>
             </div>
           );
         })}
       </div>
-      {/* legend */}
       <div className="flex items-center gap-4 justify-end">
-        <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ background: 'rgba(100,230,180,0.65)' }} />
-          <span className="font-mono text-[9px] uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>Ingresos</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ background: 'rgba(255,160,100,0.55)' }} />
-          <span className="font-mono text-[9px] uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>Gastos</span>
-        </div>
+        {[['rgba(100,230,180,0.65)', 'Ingresos'], ['rgba(255,160,100,0.55)', 'Gastos']].map(([c, l]) => (
+          <div key={l as string} className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-sm" style={{ background: c as string }} />
+            <span className="font-mono text-[9px] uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>{l}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Donut chart: spending by bucket ── */
+function DonutChart({ budget }: { budget: MonthlyBudget | null }) {
+  if (!budget) return <p className="text-sm text-center py-6" style={{ color: 'rgba(255,255,255,0.2)' }}>Sin datos</p>;
+
+  const buckets = [
+    { label: 'Necesidades', value: budget.actual_needs   ?? 0, color: 'rgba(100,180,255,0.85)' },
+    { label: 'Gustos',      value: budget.actual_wants   ?? 0, color: 'rgba(255,160,100,0.85)' },
+    { label: 'Ahorros',     value: budget.actual_savings ?? 0, color: 'rgba(100,230,180,0.85)' },
+    { label: 'Deuda',       value: budget.actual_debt    ?? 0, color: 'rgba(255,100,100,0.85)' },
+  ];
+  const total = buckets.reduce((s, b) => s + b.value, 0);
+  if (total === 0)
+    return <p className="text-sm text-center py-6" style={{ color: 'rgba(255,255,255,0.2)' }}>Sin gastos este mes</p>;
+
+  const r = 40;
+  const circ = 2 * Math.PI * r;
+  let offset = 0;
+
+  return (
+    <div className="flex items-center gap-4">
+      <div className="shrink-0">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="14" />
+          {buckets.map((b) => {
+            const dash  = (b.value / total) * circ;
+            const gap   = circ - dash;
+            const off   = circ * 0.25 - offset;
+            offset += dash;
+            return (
+              <circle key={b.label} cx="50" cy="50" r={r} fill="none"
+                stroke={b.color} strokeWidth="14"
+                strokeDasharray={`${dash} ${gap}`}
+                strokeDashoffset={off}
+                style={{ transition: 'stroke-dasharray 0.7s ease' }}
+              />
+            );
+          })}
+          <text x="50" y="53" textAnchor="middle" fill="rgba(255,255,255,0.7)"
+            fontSize="10" fontFamily="monospace">
+            {formatCurrency(total)}
+          </text>
+        </svg>
+      </div>
+      <div className="space-y-1.5 flex-1">
+        {buckets.map((b) => (
+          <div key={b.label} className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full shrink-0" style={{ background: b.color }} />
+              <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.5)' }}>{b.label}</span>
+            </div>
+            <span className="font-mono text-[10px] font-semibold" style={{ color: b.color }}>
+              {total > 0 ? ((b.value / total) * 100).toFixed(0) : 0}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Savings rate ring ── */
+function SavingsRing({ income, savings }: { income: number; savings: number }) {
+  const pct = income > 0 ? Math.min((savings / income) * 100, 100) : 0;
+  const r = 28;
+  const circ = 2 * Math.PI * r;
+  const dash = (pct / 100) * circ;
+  const color = pct >= 20 ? 'rgba(100,230,180,0.85)' : pct >= 10 ? 'rgba(255,200,80,0.85)' : 'rgba(255,100,100,0.85)';
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <svg width="72" height="72" viewBox="0 0 72 72">
+        <circle cx="36" cy="36" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" />
+        <circle cx="36" cy="36" r={r} fill="none"
+          stroke={color} strokeWidth="10"
+          strokeDasharray={`${dash} ${circ - dash}`}
+          strokeDashoffset={circ * 0.25}
+          strokeLinecap="round"
+          style={{ transition: 'stroke-dasharray 0.7s ease' }}
+        />
+        <text x="36" y="40" textAnchor="middle" fill={color} fontSize="11" fontFamily="monospace" fontWeight="bold">
+          {pct.toFixed(0)}%
+        </text>
+      </svg>
+      <span className="font-mono text-[9px] uppercase tracking-wider text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
+        Tasa de<br />ahorro
+      </span>
+    </div>
+  );
+}
+
+/* ── Net cash flow bar ── */
+function NetFlowBar({ income, expenses }: { income: number; expenses: number }) {
+  const maxVal = Math.max(income, expenses, 1);
+  const iPct = (income   / maxVal) * 100;
+  const ePct = (expenses / maxVal) * 100;
+  const neto = income - expenses;
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-2">
+        {[
+          { label: 'Ingresos',  value: income,   pct: iPct, color: 'rgba(100,230,180,0.7)' },
+          { label: 'Gastos',    value: expenses, pct: ePct, color: 'rgba(255,160,100,0.65)' },
+        ].map((row) => (
+          <div key={row.label} className="space-y-1">
+            <div className="flex justify-between text-[10px]">
+              <span style={{ color: 'rgba(255,255,255,0.4)' }}>{row.label}</span>
+              <span className="font-mono font-semibold" style={{ color: row.color }}>{formatCurrency(row.value)}</span>
+            </div>
+            <div className="w-full rounded-full h-1.5" style={{ background: 'rgba(255,255,255,0.06)' }}>
+              <div className="h-1.5 rounded-full transition-all duration-700"
+                style={{ width: `${row.pct}%`, background: row.color }} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-between pt-1 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+        <span className="font-mono text-[9px] uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.35)' }}>Neto del mes</span>
+        <span className="font-mono text-sm font-bold" style={{ color: neto >= 0 ? 'rgba(100,230,180,0.9)' : 'rgba(255,100,100,0.9)' }}>
+          {neto >= 0 ? '+' : ''}{formatCurrency(neto)}
+        </span>
       </div>
     </div>
   );
@@ -142,7 +245,7 @@ export default function Dashboard() {
         setBudget(budgetData);
         setBudgets(budgetsList ?? []);
       } catch (err) {
-        console.error('Error cargando datos:', err);
+        console.error('Dashboard load error:', err);
       } finally {
         setLoading(false);
       }
@@ -150,24 +253,20 @@ export default function Dashboard() {
     load();
   }, []);
 
-  if (loading) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64"><Spinner size="lg" /></div>
-      </DashboardLayout>
-    );
-  }
+  if (loading) return (
+    <DashboardLayout>
+      <div className="flex items-center justify-center h-64"><Spinner size="lg" /></div>
+    </DashboardLayout>
+  );
 
+  const income       = budget?.total_income ?? report?.total_ingresos ?? 0;
   const totalExpenses = budget
     ? ((budget.actual_needs ?? 0) + (budget.actual_wants ?? 0) + (budget.actual_savings ?? 0) + (budget.actual_debt ?? 0))
     : 0;
-  const income  = budget?.total_income ?? report?.total_ingresos ?? 0;
-  const neto    = income - totalExpenses;
-  const ahorros = budget?.actual_savings ?? 0;
-  const hasBudget = budget && (budget.budgeted_needs > 0 || budget.budgeted_wants > 0 || budget.budgeted_savings > 0);
-
-  const goalPct = goal && goal.meta_ingresos > 0
-    ? Math.min((income / goal.meta_ingresos) * 100, 100) : 0;
+  const neto         = income - totalExpenses;
+  const ahorros      = budget?.actual_savings ?? 0;
+  const hasBudget    = budget && (budget.budgeted_needs > 0 || budget.budgeted_wants > 0 || budget.budgeted_savings > 0);
+  const goalPct      = goal && goal.meta_ingresos > 0 ? Math.min((income / goal.meta_ingresos) * 100, 100) : 0;
 
   return (
     <DashboardLayout>
@@ -177,26 +276,22 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <p className="font-mono text-[10px] tracking-[0.2em] uppercase mb-1"
-               style={{ color: 'rgba(204,255,0,0.55)' }}>
-              {MONTHS_FULL[mes - 1]} {ano}
-            </p>
+               style={{ color: 'rgba(204,255,0,0.55)' }}>{MONTHS_FULL[mes - 1]} {ano}</p>
             <h1 className="text-2xl font-bold text-white">Dashboard</h1>
           </div>
-          <Button variant="primary" onClick={() => router.push('/upload')}>
-            + Subir estado de cuenta
-          </Button>
+          <Button variant="primary" onClick={() => router.push('/upload')}>+ Subir estado de cuenta</Button>
         </div>
 
         {/* ── 4 stat cards ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard title="Ingresos del mes"  value={formatCurrency(income)}        valueColor="text-vault-emerald" />
-          <StatCard title="Gastos del mes"    value={formatCurrency(totalExpenses)}  valueColor="text-vault-coral" />
-          <StatCard title="Neto"              value={formatCurrency(neto)}
+          <StatCard title="Ingresos del mes" value={formatCurrency(income)}        valueColor="text-vault-emerald" />
+          <StatCard title="Gastos del mes"   value={formatCurrency(totalExpenses)} valueColor="text-vault-coral" />
+          <StatCard title="Neto"             value={formatCurrency(neto)}
             valueColor={neto >= 0 ? 'text-vault-blue' : 'text-vault-coral'} />
-          <StatCard title="Ahorros"           value={formatCurrency(ahorros)}        valueColor="text-vault-blue" />
+          <StatCard title="Ahorros"          value={formatCurrency(ahorros)}       valueColor="text-vault-blue" />
         </div>
 
-        {/* ── Bar chart + Presupuesto 50-30-20 ── */}
+        {/* ── Row 2: Bar chart | Donut + Savings ring ── */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
           {/* Bar chart */}
@@ -206,8 +301,43 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Budget progress */}
+          {/* Donut + savings ring */}
+          <div className="lg:col-span-2 flex flex-col gap-4">
+            <Card title="Distribución de gastos">
+              <DonutChart budget={budget} />
+            </Card>
+            <div className="rounded-xl p-4 flex items-center gap-4"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <SavingsRing income={income} savings={ahorros} />
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-semibold text-white">{formatCurrency(ahorros)}</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  {income > 0
+                    ? `Estás ahorrando el ${((ahorros / income) * 100).toFixed(1)}% de tus ingresos`
+                    : 'Sin ingresos registrados este mes'}
+                </p>
+                {income > 0 && (
+                  <p className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                    Meta recomendada: 20%
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Row 3: Net flow + Budget progress ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+
+          {/* Net flow bar */}
           <div className="lg:col-span-2">
+            <Card title={`Flujo del mes — ${MONTHS_FULL[mes - 1]}`}>
+              <NetFlowBar income={income} expenses={totalExpenses} />
+            </Card>
+          </div>
+
+          {/* Budget 50-30-20 progress */}
+          <div className="lg:col-span-3">
             <Card title="Presupuesto 50-30-20">
               {hasBudget ? (
                 <div className="space-y-3">
@@ -224,15 +354,9 @@ export default function Dashboard() {
                             <span style={{ color: 'rgba(255,255,255,0.55)' }}>{b.label}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-[11px]" style={{ color: sc }}>
-                              {formatCurrency(actual)}
-                            </span>
-                            <span className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                              / {formatCurrency(budgeted)}
-                            </span>
-                            <span className="font-mono text-[10px] w-7 text-right" style={{ color: sc }}>
-                              {pct.toFixed(0)}%
-                            </span>
+                            <span className="font-mono text-[11px]" style={{ color: sc }}>{formatCurrency(actual)}</span>
+                            <span className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.2)' }}>/ {formatCurrency(budgeted)}</span>
+                            <span className="font-mono text-[10px] w-7 text-right" style={{ color: sc }}>{pct.toFixed(0)}%</span>
                           </div>
                         </div>
                         <div className="w-full rounded-full h-1.5" style={{ background: 'rgba(255,255,255,0.06)' }}>
@@ -244,7 +368,7 @@ export default function Dashboard() {
                   })}
                   <div className="pt-1 flex justify-between items-center">
                     <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                      Ingresos: {formatCurrency(income)}
+                      Ingresos del mes: {formatCurrency(income)}
                     </span>
                     <button onClick={() => router.push('/budget')}
                       className="font-mono text-[9px] tracking-widest uppercase"
@@ -256,7 +380,7 @@ export default function Dashboard() {
               ) : (
                 <div className="flex flex-col gap-3 py-2">
                   <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                    Agrega ingresos para ver tu presupuesto 50-30-20.
+                    Registra ingresos para ver tu distribución 50-30-20.
                   </p>
                   <Button variant="secondary" onClick={() => router.push('/income')}>
                     Registrar ingreso
@@ -267,10 +391,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── Meta + Documentos ── */}
+        {/* ── Row 4: Meta + Documentos ── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-          {/* Meta de ingresos */}
           <Card title={`Meta de ingresos — ${MONTHS_FULL[mes - 1]} ${ano}`} neon>
             {goal && goal.meta_ingresos > 0 ? (
               <div className="space-y-3">
@@ -295,17 +418,12 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="flex items-center justify-between">
-                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Sin meta configurada para este mes.
-                </p>
-                <Button variant="secondary" onClick={() => router.push('/settings')}>
-                  + Configurar meta
-                </Button>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Sin meta configurada.</p>
+                <Button variant="secondary" onClick={() => router.push('/settings')}>+ Configurar meta</Button>
               </div>
             )}
           </Card>
 
-          {/* Documentos recientes */}
           <Card title="Documentos recientes">
             {documents.length === 0 ? (
               <p className="text-sm py-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
@@ -329,8 +447,8 @@ export default function Dashboard() {
               </div>
             )}
           </Card>
-        </div>
 
+        </div>
       </div>
     </DashboardLayout>
   );
