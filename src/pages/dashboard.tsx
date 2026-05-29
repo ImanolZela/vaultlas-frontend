@@ -27,62 +27,124 @@ const statusColor = (pct: number) =>
 
 /* ── Bar chart: income vs expenses last 6 months ── */
 function BarChart({ budgets }: { budgets: MonthlyBudget[] }) {
+  const CHART_H = 160;
   const sorted = [...budgets].sort((a, b) => a.month.localeCompare(b.month)).slice(-6);
-  if (sorted.length === 0)
-    return <p className="text-sm text-center py-6" style={{ color: 'rgba(255,255,255,0.2)' }}>Sin historial</p>;
 
-  const maxVal = Math.max(...sorted.map((b) => Math.max(
-    b.total_income,
-    (b.actual_needs ?? 0) + (b.actual_wants ?? 0) + (b.actual_savings ?? 0) + (b.actual_debt ?? 0),
-  )), 1);
+  if (sorted.length === 0)
+    return <p className="text-sm text-center py-8" style={{ color: 'rgba(255,255,255,0.2)' }}>Sin historial disponible</p>;
+
+  const maxVal = Math.max(
+    ...sorted.flatMap((b) => [
+      b.total_income,
+      (b.actual_needs ?? 0) + (b.actual_wants ?? 0) + (b.actual_savings ?? 0) + (b.actual_debt ?? 0),
+    ]),
+    1,
+  );
+
+  const toPx = (v: number) => v > 0 ? Math.max((v / maxVal) * CHART_H, 4) : 0;
+
+  // Y-axis tick values: 4 evenly spaced
+  const ticks = [0.25, 0.5, 0.75, 1].map((f) => maxVal * f);
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-end gap-1.5 h-28">
-        {sorted.map((b) => {
-          const income   = b.total_income;
-          const expenses = (b.actual_needs ?? 0) + (b.actual_wants ?? 0) + (b.actual_savings ?? 0) + (b.actual_debt ?? 0);
-          const iH = income   > 0 ? Math.max((income   / maxVal) * 100, 4) : 0;
-          const eH = expenses > 0 ? Math.max((expenses / maxVal) * 100, 4) : 0;
-          const d  = new Date(b.month + 'T00:00:00');
-          return (
-            <div key={b.month} className="flex-1 flex flex-col items-center gap-1 group">
-              <div className="relative w-full flex items-end justify-center gap-[2px]" style={{ height: '100px' }}>
-                <div className="group/i relative w-[45%]">
-                  {income > 0 && (
-                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover/i:block z-10 whitespace-nowrap">
-                      <div className="rounded px-1.5 py-0.5 text-[9px] font-mono" style={{ background: 'rgba(0,0,0,0.9)', color: 'rgba(100,230,180,0.9)' }}>
-                        {formatCurrency(income)}
+    <div className="space-y-2">
+      <div className="flex gap-2">
+        {/* Y-axis labels */}
+        <div className="flex flex-col justify-between items-end shrink-0 pb-6" style={{ height: CHART_H }}>
+          {[...ticks].reverse().map((t) => (
+            <span key={t} className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              {t >= 1000 ? `${(t / 1000).toFixed(0)}k` : t.toFixed(0)}
+            </span>
+          ))}
+        </div>
+
+        {/* Chart area */}
+        <div className="flex-1 flex flex-col gap-1">
+          {/* Grid + bars */}
+          <div className="relative" style={{ height: CHART_H }}>
+            {/* Horizontal grid lines */}
+            {ticks.map((t) => (
+              <div key={t} className="absolute w-full"
+                style={{ bottom: `${(t / maxVal) * 100}%`, borderTop: '1px solid rgba(255,255,255,0.04)' }} />
+            ))}
+
+            {/* Bar columns */}
+            <div className="absolute inset-0 flex items-end gap-2">
+              {sorted.map((b) => {
+                const income   = b.total_income;
+                const expenses = (b.actual_needs ?? 0) + (b.actual_wants ?? 0) + (b.actual_savings ?? 0) + (b.actual_debt ?? 0);
+                const iH = toPx(income);
+                const eH = toPx(expenses);
+                const d  = new Date(b.month + 'T00:00:00');
+                return (
+                  <div key={b.month} className="flex-1 flex flex-col items-end justify-end gap-0" style={{ height: '100%' }}>
+                    <div className="flex items-end justify-center gap-[3px] w-full" style={{ height: '100%' }}>
+                      {/* Income bar */}
+                      <div className="flex-1 flex flex-col justify-end group/i relative">
+                        {income > 0 && (
+                          <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover/i:flex z-20 whitespace-nowrap flex-col items-center pointer-events-none">
+                            <div className="rounded px-2 py-1 text-[9px] font-mono"
+                              style={{ background: 'rgba(10,10,10,0.95)', color: 'rgba(100,230,180,0.95)', border: '1px solid rgba(100,230,180,0.2)' }}>
+                              {formatCurrency(income)}
+                            </div>
+                            <div className="w-px h-1.5" style={{ background: 'rgba(100,230,180,0.3)' }} />
+                          </div>
+                        )}
+                        <div className="w-full rounded-t-md transition-all duration-700"
+                          style={{
+                            height: iH,
+                            background: 'linear-gradient(to top, rgba(100,230,180,0.45), rgba(100,230,180,0.8))',
+                          }} />
+                      </div>
+                      {/* Expense bar */}
+                      <div className="flex-1 flex flex-col justify-end group/e relative">
+                        {expenses > 0 && (
+                          <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover/e:flex z-20 whitespace-nowrap flex-col items-center pointer-events-none">
+                            <div className="rounded px-2 py-1 text-[9px] font-mono"
+                              style={{ background: 'rgba(10,10,10,0.95)', color: 'rgba(255,160,100,0.95)', border: '1px solid rgba(255,160,100,0.2)' }}>
+                              {formatCurrency(expenses)}
+                            </div>
+                            <div className="w-px h-1.5" style={{ background: 'rgba(255,160,100,0.3)' }} />
+                          </div>
+                        )}
+                        <div className="w-full rounded-t-md transition-all duration-700"
+                          style={{
+                            height: eH,
+                            background: 'linear-gradient(to top, rgba(255,160,100,0.38), rgba(255,160,100,0.72))',
+                          }} />
                       </div>
                     </div>
-                  )}
-                  <div className="w-full rounded-t transition-all duration-700 absolute bottom-0"
-                    style={{ height: `${iH}%`, background: 'linear-gradient(to top, rgba(100,230,180,0.35), rgba(100,230,180,0.7))' }} />
-                </div>
-                <div className="group/e relative w-[45%]">
-                  {expenses > 0 && (
-                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover/e:block z-10 whitespace-nowrap">
-                      <div className="rounded px-1.5 py-0.5 text-[9px] font-mono" style={{ background: 'rgba(0,0,0,0.9)', color: 'rgba(255,160,100,0.9)' }}>
-                        {formatCurrency(expenses)}
-                      </div>
-                    </div>
-                  )}
-                  <div className="w-full rounded-t transition-all duration-700 absolute bottom-0"
-                    style={{ height: `${eH}%`, background: 'linear-gradient(to top, rgba(255,160,100,0.3), rgba(255,160,100,0.6))' }} />
-                </div>
-              </div>
-              <span className="font-mono text-[9px] uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                {MONTHS_SHORT[d.getMonth()]}
-              </span>
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
+          </div>
+
+          {/* X-axis month labels */}
+          <div className="flex gap-2">
+            {sorted.map((b) => {
+              const d = new Date(b.month + 'T00:00:00');
+              return (
+                <div key={b.month} className="flex-1 text-center">
+                  <span className="font-mono text-[9px] uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    {MONTHS_SHORT[d.getMonth()]}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
-      <div className="flex items-center gap-4 justify-end">
-        {[['rgba(100,230,180,0.65)', 'Ingresos'], ['rgba(255,160,100,0.55)', 'Gastos']].map(([c, l]) => (
-          <div key={l as string} className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-sm" style={{ background: c as string }} />
-            <span className="font-mono text-[9px] uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>{l}</span>
+
+      {/* Legend */}
+      <div className="flex items-center gap-5 justify-end pt-1">
+        {([
+          ['linear-gradient(to top, rgba(100,230,180,0.45), rgba(100,230,180,0.8))', 'Ingresos'],
+          ['linear-gradient(to top, rgba(255,160,100,0.38), rgba(255,160,100,0.72))', 'Gastos'],
+        ] as const).map(([bg, label]) => (
+          <div key={label} className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm" style={{ background: bg }} />
+            <span className="font-mono text-[9px] uppercase" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</span>
           </div>
         ))}
       </div>
